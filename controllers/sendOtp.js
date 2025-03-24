@@ -5,10 +5,12 @@ const sendOtpToUser = require("../utils/sendOtpToUser")
 
 async function sendOtp(req, res) {
   /*
+  
   --------
   Scenario
   --------
   Mike can request upto 20 Otp per day, reason for this is, rate limiting helps prevent from abusing an API or endpoint by sending a large number of requests in a short period
+  
   */
 
   let otp = createOtp();

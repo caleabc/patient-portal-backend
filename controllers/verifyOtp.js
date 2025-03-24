@@ -1,38 +1,26 @@
-let Otp = require("../models/otpData");
-
+const OtpData = require("../models/otpData");
 
 async function verifyOtp(req, res) {
-
-    let requestId = req.body.requestId;
-    let otpFromUser = req.body.otp
-
-...
-
-    try {
-        const otp = await Otp.findOne({ requestId });
-    if (otp !== null ) {
-      res
-        .status(200)
-        .json({ message: "Product fetched successfully", product: product });
-    } else {
-      res.status(404).json({ message: "Product not found" });
-    }
-    } catch (error){
-
-    }
+  let requestorId... = req.body.requestId;
+  let otpFromUser = req.body.otp;
 
   try {
-    // Save Otp to database
-    const newOtp = new Otp({ requestId, otp });
-    await newOtp.save();
+    const otpData = await OtpData.findOne({ requestId });
 
-    // Send Otp to user
-    let send = sendOtp(otp, phoneNumber);
-
-    res.status(200).json({ message: "OTP sent" });
+    if (otpData === null) {
+      console.log("Invalid request");
+      res.status(500).json({ message: "Invalid request" });
+    } else {
+      if (otpData.otps.includes(otpFromUser)) {
+        res.status(200).json({ message: "OTP is correct" });
+      } else {
+        console.log("OTP is incorrect or expired");
+        res.status(500).json({ message: "OTP is incorrect or expired" });
+      }
+    }
   } catch (error) {
-    console.log("Error sending OTP. Error ID: vnzusacca");
-    res.status(500).json({ message: "Error sending OTP", error });
+    console.log("Error in verifying an OTP");
+    res.status(500).json({ message: "Error in verifying an OTP" });
   }
 }
 
