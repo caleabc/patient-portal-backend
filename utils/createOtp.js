@@ -8,7 +8,7 @@ function createOtp() {
     output += digits[randomIndex];
   }
 
-  return output;
+  return Number(output);
 }
 
 module.exports = createOtp;
