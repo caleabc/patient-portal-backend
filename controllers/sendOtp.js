@@ -14,10 +14,10 @@ async function sendOtp(req, res) {
   */
 
   let otp = createOtp();
-  let requestId = req.body.requestId;
+  let requestorId = req.body.requestorId;
 
   try {
-    const otpData = await OtpData.findOne({ requestId });
+    const otpData = await OtpData.findOne({ requestorId });
 
     if (otpData === null) {
       // Save Otp to database
@@ -40,7 +40,7 @@ async function sendOtp(req, res) {
         otps.push(otp);
 
         await OtpData.findOneAndUpdate(
-          { requestId: requestId },
+          { requestorId: requestorId },
           { otps: otps }
         );
       }
@@ -56,6 +56,7 @@ async function sendOtp(req, res) {
 
     res.status(200).json({ message: "OTP sent" });
   } catch (error) {
+    console.log(error)
     console.log("Error sending OTP. Error ID: vnzusacca");
     res.status(500).json({ message: "Error sending OTP", error });
   }
