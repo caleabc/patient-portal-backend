@@ -10,3 +10,5 @@ function createId() {
 
   return output;
 }
+
+module.exports = createId
