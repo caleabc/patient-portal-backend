@@ -4,9 +4,8 @@ const OtpData = require("../models/otpData");
 const Secretary = require("../models/secretary")
 
 async function verifyOtp(req, res) {
-  let requestorId = req.body.requestorId;
-  let otpFromUser = req.body.otp;
   let phoneNumber = req.body.phoneNumber;
+  let otpFromUser = req.body.otp;
 
   try {
     const otpData = await OtpData.findOne({ phoneNumber });
@@ -48,4 +47,4 @@ async function verifyOtp(req, res) {
   }
 }
 
-module.exports = sendOtp;
+module.exports = verifyOtp;
