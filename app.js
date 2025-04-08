@@ -7,12 +7,13 @@ dotenv.config(); // Load .env file
 
 // Routes
 const sendOtp = require("./routes/sendOtp");
+const consultation = require("./routes/consultation")
 
 // Create an Express application
 const app = express();
 
 // Middleware to parse JSON request bodies
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Request body size
 
 // Allow access to ...
 app.use(cors())
@@ -36,6 +37,7 @@ const dbConfiguration = require("./databaseConfiguration")
 
 // Use routes
 app.use(sendOtp)
+app.use(consultation)
 
 const PORT = 5000;
 app.listen(PORT, function (){
