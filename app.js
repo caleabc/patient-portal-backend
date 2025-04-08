@@ -33,14 +33,14 @@ app.use(limiter);
 // Database configuration
 const dbConfiguration = require("./databaseConfiguration")
 // Run DB
-// dbConfiguration()
+dbConfiguration()
 
 // Use routes
 app.use(sendOtp)
 app.use(consultation)
 
-const PORT = 5000;
-app.listen(PORT, function (){
+const port = 5000;
+app.listen(port, function (){
   console.log("Server is now running...");
 })
 

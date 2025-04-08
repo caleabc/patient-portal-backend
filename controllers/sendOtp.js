@@ -3,6 +3,14 @@ const OtpData = require("../models/otpData");
 const createOtp = require("../utils/createOtp");
 
 async function sendOtp(req, res) {
+  
+  /*
+  
+  TODO:
+  Verify first if the phone number is allowed to request for an OTP
+
+  */
+
   /*
   
   Note: A user is only allowed to have 5 OTP per month, reason for this is sms api is currently expensive as of the moment.
@@ -10,44 +18,55 @@ async function sendOtp(req, res) {
   */
 
   try {
-    let number = req.body.phoneNumber;
-    const otpData = await OtpData.findOne({ number });
+    let requestorId = req.body.requestorId;
+    let phoneNumber = req.body.phoneNumber;
+
+    const otpData = await OtpData.findOne({ requestorId });
 
     if (otpData === null) {
       /*
 
       Send an OTP to a user.
 
-      Uses semaphore sms api
+      Uses PhilSMS api
       
       */
-
       let otp = createOtp();
 
-      let apikey = "c8bc2555b14845065e49b5b095cfc5bd";
-      let message = `Your One Time Password is: ${otp}. Please use it within 5 minutes.`;
-      let sendername = "Health Record";
+      const url = "https://app.philsms.com/api/v3/sms/send";
+      const apiToken = process.env.PHILSMS_API_TOKEN;
+      const senderId = process.env.PHILSMS_SENDER_ID;
 
-      const response = await fetch("https://api.semaphore.co/api/v4/messages", {
+      const payload = {
+        recipient: "639563458792", // Replace with the data you want to send
+        sender_id: senderId,
+        type: "plain",
+        message: `Your One Time Password is: ${otp}. Please use it within 30 minutes.`,
+      };
+
+      const response = await fetch(url, {
         method: "POST",
+
         headers: {
+          Authorization: `Bearer ${apiToken}`,
+          Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          apikey: apikey,
-          number,
-          message,
-          sendername: sendername,
-        }),
+
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         /*
       
-        Since no error of sending OTP to user then let's now proceed to save OTP to DB.
+        Since no error of sending OTP to user then let's now proceed to saving OTP to DB.
     
         */
-        const newOtpData = new OtpData({ phoneNumber, otps: [otp] });
+        const newOtpData = new OtpData({
+          requestorId,
+          phoneNumber,
+          otps: [otp],
+        });
         await newOtpData.save();
 
         /*
@@ -83,31 +102,33 @@ async function sendOtp(req, res) {
 
         Send an OTP to a user.
 
-        Uses semaphore sms api
+        Uses PhilSMS api
         
         */
-
         let otp = createOtp();
 
-        let apikey = "c8bc2555b14845065e49b5b095cfc5bd";
-        let message = `Your One Time Password is: ${otp}. Please use it within 5 minutes.`;
-        let sendername = "Health Record";
+        const url = "https://app.philsms.com/api/v3/sms/send";
+        const apiToken = process.env.PHILSMS_API_TOKEN;
+        const senderId = process.env.PHILSMS_SENDER_ID;
 
-        const response = await fetch(
-          "https://api.semaphore.co/api/v4/messages",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              apikey: apikey,
-              number,
-              message,
-              sendername: sendername,
-            }),
-          }
-        );
+        const payload = {
+          recipient: "639563458792", // Replace with the data you want to send
+          sender_id: senderId,
+          type: "plain",
+          message: `Your One Time Password is: ${otp}. Please use it within 30 minutes.`,
+        };
+
+        const response = await fetch(url, {
+          method: "POST",
+
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(payload),
+        });
 
         if (response.ok) {
           /*
