@@ -7,6 +7,7 @@ dotenv.config(); // Load .env file
 
 // Routes
 const sendOtp = require("./routes/sendOtp");
+const verifyOtp = require("./routes/verifyOtp")
 const consultation = require("./routes/consultation")
 
 // Create an Express application
@@ -37,6 +38,7 @@ dbConfiguration()
 
 // Use routes
 app.use(sendOtp)
+app.use(verifyOtp)
 app.use(consultation)
 
 const port = 5000;

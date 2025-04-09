@@ -38,7 +38,7 @@ async function sendOtp(req, res) {
       const senderId = process.env.PHILSMS_SENDER_ID;
 
       const payload = {
-        recipient: "639563458792", // Replace with the data you want to send
+        recipient: phoneNumber,
         sender_id: senderId,
         type: "plain",
         message: `Your One Time Password is: ${otp}. Please use it within 30 minutes.`,
@@ -56,7 +56,11 @@ async function sendOtp(req, res) {
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
+      // This is a response from PhilSMS api
+      let responseStatus = await response.json();
+      responseStatus = responseStatus.status
+
+      if (responseStatus === "success") {
         /*
       
         Since no error of sending OTP to user then let's now proceed to saving OTP to DB.
@@ -65,7 +69,7 @@ async function sendOtp(req, res) {
         const newOtpData = new OtpData({
           requestorId,
           phoneNumber,
-          otps: [otp],
+          otps: [{ otp:Number(otp) }],
         });
         await newOtpData.save();
 
@@ -112,7 +116,7 @@ async function sendOtp(req, res) {
         const senderId = process.env.PHILSMS_SENDER_ID;
 
         const payload = {
-          recipient: "639563458792", // Replace with the data you want to send
+          recipient: phoneNumber,
           sender_id: senderId,
           type: "plain",
           message: `Your One Time Password is: ${otp}. Please use it within 30 minutes.`,
@@ -130,7 +134,11 @@ async function sendOtp(req, res) {
           body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
+        // This is a response from PhilSMS api
+        let responseStatus = await response.json();
+        responseStatus = responseStatus.status
+
+        if (responseStatus === "success") {
           /*
       
           Since no error of sending OTP to user then let's now proceed to updating the otpData.
@@ -138,7 +146,7 @@ async function sendOtp(req, res) {
           */
 
           let otps = otpData.otps;
-          otps.push(otp);
+          otps.push({ otp:Number(otp) });
 
           await OtpData.findOneAndUpdate(
             { requestorId: requestorId },
