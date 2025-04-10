@@ -1,15 +1,10 @@
+// Models
 const OtpData = require("../models/otpData");
+const PhoneNumber = require("../models/phoneNumber")
 
 const createOtp = require("../utils/createOtp");
 
 async function sendOtp(req, res) {
-  
-  /*
-  
-  TODO:
-  Verify first if the phone number is allowed to request for an OTP
-
-  */
 
   /*
   
@@ -18,8 +13,23 @@ async function sendOtp(req, res) {
   */
 
   try {
-    let requestorId = req.body.requestorId;
+
     let phoneNumber = req.body.phoneNumber;
+
+    const isPhoneNumberExist = await PhoneNumber.findOne({ phoneNumber });
+
+    if (isPhoneNumberExist === null){
+      console.log("Phone number not found")
+      
+      res.status(500).json({
+        message: "Phone number not found",
+      });
+
+      // 'return' statement must be here otherwise the code below will still run
+      return
+    }
+
+    let requestorId = req.body.requestorId;
 
     const otpData = await OtpData.findOne({ requestorId });
 
@@ -41,7 +51,7 @@ async function sendOtp(req, res) {
         recipient: phoneNumber,
         sender_id: senderId,
         type: "plain",
-        message: `Your One Time Password is: ${otp}. Please use it within 30 minutes.`,
+        message: `Your One Time Password is: ${otp}. Please use it within 60 minutes.`,
       };
 
       const response = await fetch(url, {
@@ -68,7 +78,6 @@ async function sendOtp(req, res) {
         */
         const newOtpData = new OtpData({
           requestorId,
-          phoneNumber,
           otps: [{ otp:Number(otp) }],
         });
         await newOtpData.save();
@@ -78,13 +87,13 @@ async function sendOtp(req, res) {
           Respond to a request
 
         */
-
         res.status(200).json({ message: "OTP sent." });
       }
     } else {
       let maxAllowedOtpRequestPerMonth = 5;
 
-      if (otpData.otps.length > maxAllowedOtpRequestPerMonth) {
+      if (otpData.otps.length <= maxAllowedOtpRequestPerMonth) {
+        
         console.log("User reached the max allowed otp request per month");
 
         /*
@@ -119,7 +128,7 @@ async function sendOtp(req, res) {
           recipient: phoneNumber,
           sender_id: senderId,
           type: "plain",
-          message: `Your One Time Password is: ${otp}. Please use it within 30 minutes.`,
+          message: `Your One Time Password is: ${otp}. Please use it within 60 minutes.`,
         };
 
         const response = await fetch(url, {
