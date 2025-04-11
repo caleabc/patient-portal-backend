@@ -1,24 +1,24 @@
 // Models
 const OtpData = require("../models/otpData");
-const Secretary = require("../models/secretary");
+const PhoneNumber = require("../models/phoneNumber");
+
+// Utils
+const createAuthorizationToken = require("../utils/createAuthorizationToken");
+const storage = require("../utils/storage");
 
 async function verifyOtp(req, res) {
   let requestorId = req.body.requestorId;
-  let phoneNumber = req.body.phoneNumber
+  let phoneNumber = req.body.phoneNumber;
   let otpFromUser = req.body.otp;
 
   try {
+    //Early check
+    if (requestorId === undefined || phoneNumber === undefined) {
+      console.log("Invalid request");
+      res.status(500).json({ message: "Invalid request" });
+    }
+
     const otpData = await OtpData.findOne({ requestorId });
-
-    /*
-    
-    TODO:
-
-    Pull up data from AllowedPhoneNumberToRequestOtp model and not Secretary.findOne({ phoneNumber });
-    
-    */
-
-    // const secretaryData = await Secretary.findOne({ phoneNumber });
 
     if (otpData === null) {
       console.log("Invalid request");
@@ -31,34 +31,38 @@ async function verifyOtp(req, res) {
       createdAt = new Date(createdAt).getTime(); // Convert to milliseconds
 
       let isOtpExist = false;
+
       if (latestInsertedOtp.otp === Number(otpFromUser)) {
-        console.log("aasasasawqwe", [
-          latestInsertedOtp.otp,
-          Number(otpFromUser),
-        ]);
         isOtpExist = true;
       }
 
-      // Every otp has only 30 minutes from the time created
+      // Every otp has only 60 minutes from the time created
       let isOtpNotExpired = false;
       let now = new Date();
-      let thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
-      if (now - createdAt <= thirtyMinutes) {
-        console.log("aasasasawqwe", [now - createdAt, thirtyMinutes]);
+      let sixtyMinutes = 60 * 60 * 1000; // 60 minutes in milliseconds
+      if (now - createdAt <= sixtyMinutes) {
         isOtpNotExpired = true;
       }
 
       if (isOtpExist === true && isOtpNotExpired === true) {
         /*
-      
-      OTP is valid then issue authorization token
+        
+        OTP is valid then issue authorization token
 
-      */
+        */
+
         let authorizationToken = createAuthorizationToken();
 
+        let info = await PhoneNumber.findOne({ phoneNumber });
+
         let data = {
-          role: "secretary",
-          // secretaryId: secretaryData.secretaryId,
+          phoneNumber: info.phoneNumber,
+          clinicId: info.clinicId,
+          clinicName: info.clinicName,
+          firstname: info.firstname,
+          lastname: info.lastname,
+          role: info.role,
+          authorizationToken: authorizationToken,
           createdAt: new Date(),
         };
 
@@ -67,14 +71,9 @@ async function verifyOtp(req, res) {
         Save authorizationToken to localStorage-like mechanism
 
         */
-        storage(authorizationToken, data);
+        storage.add(authorizationToken, data);
 
-        res
-          .status(200)
-          .json({
-            message: "OTP is valid",
-            authorizationToken: authorizationToken,
-          });
+        res.status(200).json(data);
       } else {
         console.log("OTP is incorrect or expired");
         res.status(500).json({ message: "OTP is incorrect or expired" });

@@ -1,9 +1,13 @@
 // Models
 let PhoneNumber = require("../models/phoneNumber");
 
-async function registerPhoneNumber(res, req) {
-  let { phoneNumber, clinicId, clinicName, firstname, lastname, role } =
-    req.body;
+async function registerPhoneNumber(req, res) {
+
+  console.log("hello rgphonenumber")
+
+  console.log(req.body)
+
+  let { phoneNumber, clinicId, clinicName, firstname, lastname, role } = req.body;
 
   try {
     const newPhoneNumber = new PhoneNumber({
@@ -18,7 +22,7 @@ async function registerPhoneNumber(res, req) {
 
     /*
         
-        Respond to a request
+      Respond to a request
 
     */
     res.status(200).json({ message: "Phone number successfully registered." });
@@ -29,4 +33,4 @@ async function registerPhoneNumber(res, req) {
   }
 }
 
-module.exports = { registerPhoneNumber };
+module.exports = registerPhoneNumber;

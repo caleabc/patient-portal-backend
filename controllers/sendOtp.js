@@ -92,7 +92,7 @@ async function sendOtp(req, res) {
     } else {
       let maxAllowedOtpRequestPerMonth = 5;
 
-      if (otpData.otps.length <= maxAllowedOtpRequestPerMonth) {
+      if (otpData.otps.length === maxAllowedOtpRequestPerMonth) {
         
         console.log("User reached the max allowed otp request per month");
 

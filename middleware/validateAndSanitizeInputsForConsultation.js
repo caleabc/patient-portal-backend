@@ -85,7 +85,7 @@ function validateAndSanitizeInputsForConsultation(req, res, next) {
     "lastname",
     "dateOfBirth",
     "gender",
-    "mobileNumber",
+    "phoneNumber",
   ];
 
   for (let key of keys) {
