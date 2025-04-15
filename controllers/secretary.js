@@ -6,7 +6,7 @@ let createId = require("../utils/createId")
 let MedicalRecord = require("../models/medicalRecord");
 let Secretary = require("../models/secretary");
 
-async function getPatientsRecords(res, req) {
+async function getPatientsRecords(req, res) {
   let authorizationToken = req.body.authorizationToken;
 
   let secretaryId = storage.get(authorizationToken).secretaryId;

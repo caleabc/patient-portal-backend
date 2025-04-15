@@ -89,6 +89,7 @@ function validateAndSanitizeInputsForConsultation(req, res, next) {
   ];
 
   for (let key of keys) {
+
     if (key === "imgsToBase64String") {
       let imgsToBase64String = req.body[key];
 
@@ -167,7 +168,7 @@ function validateAndSanitizeInputsForConsultation(req, res, next) {
 
   /*
   
-  This is very important, update the validated and sanitized body
+  This is very important, update the request body, this time it is now validated and sanitized
 
   */
   req.body = validatedandSanitizedInputs;

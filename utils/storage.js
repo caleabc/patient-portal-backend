@@ -16,7 +16,7 @@ class Storage {
       throw new Error("Key and value is required");
     }
 
-    localStorage.setItem(key, value);
+    localStorage.setItem( key, JSON.stringify(value) );
   }
 
   get(key) {
@@ -24,7 +24,7 @@ class Storage {
       throw new Error("Key is required to retrieve a value");
     }
 
-    return localStorage.getItem(key);
+    return JSON.parse(localStorage.getItem(key));
   }
 }
 

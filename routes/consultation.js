@@ -6,9 +6,9 @@ const router = express.Router();
 let consultation = require("../controllers/consultation");
 
 // Middleware
-const {validateConsultation, checkValidationResult } = require("../middleware/inputsSanitizationForConsultation")
+const isAuthorizedInConsultation = require("../middleware/isAuthorizedInConsultation")
 const validateAndSanitizeInputsForConsultation = require("../middleware/validateAndSanitizeInputsForConsultation")
 
-router.post("/consultation", validateAndSanitizeInputsForConsultation, consultation);
+router.post("/consultation", isAuthorizedInConsultation, validateAndSanitizeInputsForConsultation, consultation);
 
 module.exports = router;

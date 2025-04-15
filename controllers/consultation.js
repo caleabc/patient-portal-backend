@@ -1,29 +1,29 @@
 // Models
 const Patient = require("../models/patient");
 const MedicalRecord = require("../models/medicalRecord");
+const PatientAccessCode = require("../models/patientAccessCode");
 
 // Utils
 const createId = require("../utils/createId");
+const createAccessCode = require("../utils/createAccessCode")
+const storage = require("../utils/storage")
 
 async function consultation(req, res) {
-  let reasonForConsultation = req.body.updatedInputsData.reasonForConsultation; // string, "headache"
-  let imgsToBase64String = req.body.updatedInputsData.imgsToBase64String; // array of base64string, ["data:image/png;base64,iVBORw0KGgoAAAA"]
-  let firstname = req.body.updatedInputsData.firstname; // string
-  let lastname = req.body.updatedInputsData.lastname; // string
-  let dateOfBirth = req.body.updatedInputsData.dateOfBirth; // string
-  let gender = req.body.updatedInputsData.gender; // string
-  let phoneNumber = req.body.updatedInputsData.phoneNumber; // string
-
-  let clinicId = req.body.clinicId;
-
-  let patientInformation = {
-    patientId: createId(),
+  let {
+    reasonForConsultation,
+    imgsToBase64String,
     firstname,
     lastname,
     dateOfBirth,
     gender,
     phoneNumber,
-  };
+  } = req.body;
+
+  let authHeader = req.headers.authorization
+  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+  let info = storage.get(authorizationToken)
+
+  let clinicId = info.clinicId;
 
   try {
     let patients = Patient.find({ lastname });
@@ -47,9 +47,15 @@ async function consultation(req, res) {
     }
 
     if (isCurrentPatientExisting === true) {
-      // Existing patient
+      /*
+      
+      Existing patient
+
+      */
+
       let newMedicalRecord = new MedicalRecord({
         patientId,
+        patientFirstAndLastName: firstname + " " + lastname, // Why this field is here?
         clinicId,
         reasonForConsultation,
         photos: imgsToBase64String,
@@ -66,15 +72,14 @@ async function consultation(req, res) {
         .status(200)
         .json({ message: "Patient consultation successfully saved" });
     } else {
-      // New patient
+      /*
+      
+      New patient
+
+      */
 
       let id = createId();
 
-      /*
-    
-      Save patient information
-
-      */
       let newPatient = new Patient({
         id,
         firstname,
@@ -93,6 +98,7 @@ async function consultation(req, res) {
       */
       let newMedicalRecord = new MedicalRecord({
         patientId: id,
+        patientFirstAndLastName: firstname + " " + lastname, // Why this field is here?
         clinicId,
         reasonForConsultation,
         photos: imgsToBase64String,
@@ -100,15 +106,63 @@ async function consultation(req, res) {
 
       await newMedicalRecord.save();
 
+      if (phoneNumber === undefined) {
+        // No phone number provided
+        res
+          .status(200)
+          .json({ message: "Patient consultation successfully saved" });
+        return;
+      }
+
       /*
-          
-          Respond to a request
+      
+      Since no error, send access code to patient, this will be used when logging in.
+
+      Send an OTP to a user.
+
+      Uses PhilSMS api
 
       */
 
-      res
-        .status(200)
-        .json({ message: "Patient consultation successfully saved" });
+      let accessCode = createAccessCode();
+
+      const url = "https://app.philsms.com/api/v3/sms/send";
+      const apiToken = process.env.PHILSMS_API_TOKEN;
+      const senderId = process.env.PHILSMS_SENDER_ID;
+
+      const payload = {
+        recipient: phoneNumber,
+        sender_id: senderId,
+        type: "plain",
+        message: `Your access code is: ${accessCode}. You can use it to login in health record.`,
+      };
+
+      const response = await fetch(url, {
+        method: "POST",
+
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(payload),
+      });
+
+      /*
+      
+      Regardless of response status of PhilSMS we still need to save the access code to DB
+      
+      */
+      let newPatientAccessCode = new PatientAccessCode({
+        accessCode: accessCode,
+        patientId: id
+      });
+
+      await newPatientAccessCode.save();
+
+      res.status(200).json({ message: "Patient consultation successfully saved" })
+      
     }
   } catch (error) {
     console.log(error);

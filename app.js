@@ -10,6 +10,7 @@ const sendOtp = require("./routes/sendOtp");
 const verifyOtp = require("./routes/verifyOtp")
 const consultation = require("./routes/consultation")
 const registerPhoneNumber = require("./routes/registerPhoneNumber")
+const medicalRecords = require("./routes/medicalRecords")
 
 // Create an Express application
 const app = express();
@@ -42,6 +43,7 @@ app.use(sendOtp)
 app.use(verifyOtp)
 app.use(consultation)
 app.use(registerPhoneNumber)
+app.use(medicalRecords)
 
 const port = 5000;
 app.listen(port, function (){

@@ -2,6 +2,7 @@ let mongoose = require("mongoose");
 
 let medicalRecordSchema = new mongoose.Schema({
   patientId: { type: String, length: 32, required: true }, // This is a reference from patient model
+  patientFirstAndLastName: { type: String, required: true }, // Why this field is here?
   clinicId: { type: String, length: 32, required: true }, // This is a reference from clinic model
   createdAt: { type: Date, default: Date.now },
   reasonForConsultation: { type: String, required: true },

@@ -5,7 +5,7 @@ let storage = require("../utils/storage");
 let MedicalRecord = require("../models/medicalRecord");
 let Doctor = require("../models/doctor");
 
-async function getPatientsRecords(res, req) {
+async function getPatientsRecords(req, res) {
   let authorizationToken = req.body.authorizationToken;
 
   let doctorId = storage.get(authorizationToken).doctorId;
