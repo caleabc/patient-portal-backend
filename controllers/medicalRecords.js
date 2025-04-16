@@ -3,6 +3,7 @@ let storage = require("../utils/storage");
 
 // Models
 let MedicalRecord = require("../models/medicalRecord");
+let Patient = require("../models/patient")
 
 async function getMedicalRecordsByClinicId(req, res) {
   let authHeader = req.headers.authorization
@@ -24,17 +25,17 @@ async function getMedicalRecordsByClinicId(req, res) {
   }
 }
 
-async function getMedicalRecordsByPatientId(req, res) {
-  let authHeader = req.headers.authorization
-  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+async function getMedicalRecordById(req, res) {
 
-  let info = storage.get(authorizationToken);
-  let clinicId = info.clinicId;
+  const { id } = req.params;
 
   try {
-    let patientRecords = await MedicalRecord.find({ clinicId });
+    let medicalRecord = await MedicalRecord.findOne({ id });
 
-    res.status(200).json({ patientRecords });
+    let patientId = medicalRecord.patientId
+    let patientInformation = await Patient.findOne({ id:patientId });
+
+    res.status(200).json({medicalRecord, patientInformation});
   } catch (error) {
     console.log(error);
     console.log("Error in getting patient medical record");
@@ -44,4 +45,4 @@ async function getMedicalRecordsByPatientId(req, res) {
   }
 }
 
-module.exports = { getMedicalRecordsByClinicId, getMedicalRecordsByPatientId };
+module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById };

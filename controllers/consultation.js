@@ -5,8 +5,8 @@ const PatientAccessCode = require("../models/patientAccessCode");
 
 // Utils
 const createId = require("../utils/createId");
-const createAccessCode = require("../utils/createAccessCode")
-const storage = require("../utils/storage")
+const createAccessCode = require("../utils/createAccessCode");
+const storage = require("../utils/storage");
 
 async function consultation(req, res) {
   let {
@@ -19,14 +19,14 @@ async function consultation(req, res) {
     phoneNumber,
   } = req.body;
 
-  let authHeader = req.headers.authorization
-  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
-  let info = storage.get(authorizationToken)
+  let authHeader = req.headers.authorization;
+  let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
+  let info = storage.get(authorizationToken);
 
   let clinicId = info.clinicId;
 
   try {
-    let patients = Patient.find({ lastname });
+    let patients = await Patient.find({ lastname: lastname.toLowerCase() });
 
     let isCurrentPatientExisting = false;
     let patientId = null;
@@ -35,12 +35,12 @@ async function consultation(req, res) {
       let patient = patients[i];
 
       if (
-        patient["lastname"] === lastname &&
-        patient["firstname"] === firstname &&
+        patient["lastname"] === lastname.toLowerCase() &&
+        patient["firstname"] === firstname.toLowerCase() &&
         patient["dateOfBirth"] === dateOfBirth
       ) {
         isCurrentPatientExisting = true;
-        patientId = patient.patientId;
+        patientId = patient.id;
 
         break;
       }
@@ -54,8 +54,10 @@ async function consultation(req, res) {
       */
 
       let newMedicalRecord = new MedicalRecord({
+        id: createId(),
         patientId,
-        patientFirstAndLastName: firstname + " " + lastname, // Why this field is here?
+        patientFirstAndLastName:
+          firstname.toLowerCase() + " " + lastname.toLowerCase(), // Why this field is here?
         clinicId,
         reasonForConsultation,
         photos: imgsToBase64String,
@@ -78,12 +80,13 @@ async function consultation(req, res) {
 
       */
 
-      let id = createId();
+      // There is already patientId variable above so we will just update the value of it.
+      patientId = createId();
 
       let newPatient = new Patient({
-        id,
-        firstname,
-        lastname,
+        id: patientId,
+        firstname: firstname.toLowerCase(),
+        lastname: lastname.toLowerCase(),
         dateOfBirth,
         gender,
         mobile: phoneNumber,
@@ -97,8 +100,10 @@ async function consultation(req, res) {
     
       */
       let newMedicalRecord = new MedicalRecord({
-        patientId: id,
-        patientFirstAndLastName: firstname + " " + lastname, // Why this field is here?
+        id: createId(),
+        patientId: patientId,
+        patientFirstAndLastName:
+          firstname.toLowerCase() + " " + lastname.toLowerCase(), // Why this field is here?
         clinicId,
         reasonForConsultation,
         photos: imgsToBase64String,
@@ -156,13 +161,14 @@ async function consultation(req, res) {
       */
       let newPatientAccessCode = new PatientAccessCode({
         accessCode: accessCode,
-        patientId: id
+        patientId: patientId,
       });
 
       await newPatientAccessCode.save();
 
-      res.status(200).json({ message: "Patient consultation successfully saved" })
-      
+      res
+        .status(200)
+        .json({ message: "Patient consultation successfully saved" });
     }
   } catch (error) {
     console.log(error);
