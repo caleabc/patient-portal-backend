@@ -67,4 +67,39 @@ async function getMedicalRecordsBySearchQuery(req, res) {
   }
 }
 
-module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordsBySearchQuery };
+async function updateMedicalRecordById(req, res) {
+  let authHeader = req.headers.authorization
+  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+
+  let info = storage.get(authorizationToken);
+  let role = info.role;
+
+  /*
+  
+  Only the doctor can update the medical record
+
+  */
+  if (role !== "doctor"){
+    console.log("Unauthorized");
+    res.status(500).json({ message: "Unauthorized" });
+
+    return
+  }
+
+  const { id } = req.params;
+
+  try {
+    let {diagnosis, remarks} = req.body
+    let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {diagnosis, remarks}, {new:true}) // {new:true} This returns the updated document instead of the old one
+
+    res.status(200).json(updatedMedicalRecord);
+  } catch (error) {
+    console.log(error);
+    console.log("Error in updating patient medical record");
+    res
+      .status(500)
+      .json({ message: "Error in updating patient medical record" });
+  }
+}
+
+module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordsBySearchQuery, updateMedicalRecordById };
