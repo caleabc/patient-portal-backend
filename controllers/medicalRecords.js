@@ -13,7 +13,7 @@ async function getMedicalRecordsByClinicId(req, res) {
   let clinicId = info.clinicId;
 
   try {
-    let patientsRecords = await MedicalRecord.find({ clinicId });
+    let patientsRecords = await MedicalRecord.find({ clinicId }).select('-photos').sort({ createdAt: -1 }).limit(50);
 
     res.status(200).json(patientsRecords);
   } catch (error) {
@@ -45,4 +45,26 @@ async function getMedicalRecordById(req, res) {
   }
 }
 
-module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById };
+async function getMedicalRecordsBySearchQuery(req, res) {
+  let authHeader = req.headers.authorization
+  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+
+  let info = storage.get(authorizationToken);
+  let clinicId = info.clinicId;
+
+  let query = req.query.q;
+
+  try {
+    let patientsRecords = await MedicalRecord.find({clinicId: clinicId, patientFirstAndLastName: { $regex: query, $options: 'i' }}).select('-photos').sort({ createdAt: -1 }).limit(50);
+
+    res.status(200).json(patientsRecords);
+  } catch (error) {
+    console.log(error);
+    console.log("Error in getting patients medical record");
+    res
+      .status(500)
+      .json({ message: "Error in getting patients medical record" });
+  }
+}
+
+module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordsBySearchQuery };
