@@ -1,10 +1,10 @@
 // Models
 const OtpData = require("../models/otpData");
 const PhoneNumber = require("../models/phoneNumber");
+const AuthorizationData = require("../models/authorizationData")
 
 // Utils
 const createAuthorizationToken = require("../utils/createAuthorizationToken");
-const storage = require("../utils/storage");
 
 async function verifyOtp(req, res) {
   let requestorId = req.body.requestorId;
@@ -66,12 +66,9 @@ async function verifyOtp(req, res) {
           createdAt: new Date(),
         };
 
-        /*
-
-        Save authorizationToken to localStorage-like mechanism
-
-        */
-        storage.add(authorizationToken, data);
+        let newAuthorizationData = new AuthorizationData({authorizationToken, ...data})
+        
+        await newAuthorizationData.save()
 
         res.status(200).json(data);
       } else {

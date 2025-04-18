@@ -1,15 +1,13 @@
-// Utils
-const storage = require("../utils/storage")
+// Models
+const AuthorizationData = require("../models/authorizationData")
 
-function isAuthorized (req, res, next){
+async function isAuthorized (req, res, next){
     let authHeader = req.headers.authorization
     let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
 
-    console.log(authorizationToken)
+    let authorizationData = await AuthorizationData.findOne({authorizationToken})
 
-    let data = storage.get(authorizationToken)
-
-    if (data === null){
+    if (authorizationData === null){
         console.log("Unauthorized")
         
         res.status(500).json({ error: "Unauthorized" });

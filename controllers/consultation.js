@@ -2,11 +2,11 @@
 const Patient = require("../models/patient");
 const MedicalRecord = require("../models/medicalRecord");
 const PatientAccessCode = require("../models/patientAccessCode");
+const AuthorizationData = require("../models/authorizationData")
 
 // Utils
 const createId = require("../utils/createId");
 const createAccessCode = require("../utils/createAccessCode");
-const storage = require("../utils/storage");
 
 async function consultation(req, res) {
   let {
@@ -21,11 +21,13 @@ async function consultation(req, res) {
 
   let authHeader = req.headers.authorization;
   let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
-  let info = storage.get(authorizationToken);
 
-  let clinicId = info.clinicId;
+  let clinicId;
 
   try {
+    let authorizationData = await AuthorizationData.findOne({authorizationToken})
+    clinicId = authorizationData.clinicId
+
     let patients = await Patient.find({ lastname: lastname.toLowerCase() });
 
     let isCurrentPatientExisting = false;

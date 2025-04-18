@@ -1,3 +1,9 @@
+/*
+
+TODO: Verify if this controller is active
+
+*/
+
 // Utils
 let storage = require("../utils/storage");
 
@@ -11,6 +17,10 @@ async function getPatientsRecords(req, res) {
   let doctorId = storage.get(authorizationToken).doctorId;
 
   try {
+    // let authorizationData = await AuthorizationData.findOne({authorizationToken})
+    
+
+
     // Code wrapping ensures the await expression to be fully completed before accessing the response object, (...).clinicId
     let clinicId = (await Secretary.findOne({ id: doctorId })).clinicId;
 

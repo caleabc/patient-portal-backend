@@ -1,46 +1,42 @@
-/*
-README
-
-This is the same to localStorage in the browser
-
-*/
-
-if (typeof localStorage === "undefined" || localStorage === null) {
-  var LocalStorage = require("node-localstorage").LocalStorage;
-  var localStorage = new LocalStorage("./scratch");
-}
+// Models
+const AuthorizationTokenData = require("../models/authorizationTokenData")
 
 class Storage {
-  add(key, value) {
+  async add(key, value) {
     if (!key || value === undefined) {
       throw new Error("Key and value is required");
     }
 
-    localStorage.setItem( key, JSON.stringify(value) );
+    const newAuthorizationTokenData = new AuthorizationTokenData({key:key, value:JSON.stringify(value)});
+
+    await newAuthorizationTokenData.save();
   }
 
-  get(key) {
+  async get(key) {
     if (!key) {
       throw new Error("Key is required to retrieve a value");
     }
 
-    return JSON.parse(localStorage.getItem(key));
+    let value = await AuthorizationTokenData.findOne({ key });
+
+    return JSON.parse(value);
   }
 }
 
-let storage = new Storage()
+let storage = new Storage();
 
 // Singleton approach
 module.exports = storage;
 
 /*
------
-Usage
------
-
-let storage = require("../utils/storage")
-
-storage.add('mykey', 55)
-storage.get('mykey')
-
+  -----
+  Usage
+  -----
+  
+  let storage = require("../utils/storage")
+  
+  await storage.add('mykey', 55)
+  await storage.get('mykey')
+  
 */
+
