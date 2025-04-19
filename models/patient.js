@@ -6,7 +6,7 @@ let patientSchema = new mongoose.Schema({
   lastname: { type: String, required: true },
   dateOfBirth: { type: String, required: true },
   gender: { type: String },
-  mobile: { type: String }
+  phoneNumber: { type: String }
 });
 
 let Patient = mongoose.model("Patient", patientSchema);

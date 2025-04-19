@@ -1,28 +1,31 @@
 let mongoose = require("mongoose");
 
-let scheduleSchema = new mongoose.Schema({
-  monday: { type: String, required: true },
-  tuesday: { type: String, required: true },
-  wednesday: { type: String, required: true },
-  thursday: { type: String, required: true },
-  friday: { type: String, required: true },
-  saturday: { type: String, required: true },
-  sunday: { type: String, required: true },
-});
 
 let addressSchema = new mongoose.Schema({
-  country: { type: String, required: true },
-  province: { type: String, required: true },
-  city: { type: String, required: true },
-  street: { type: String, required: true },
-});
+  buildingName: { type: String },
+  street: { type: String },
+  barangay: { type: String },
+  cityOrMunicipality: { type: String },
+  province: { type: String },
+  country: { type: String }
+})
+
+let scheduleSchema = new mongoose.Schema({
+  monday: { type: String },
+  tuesday: { type: String },
+  wednesday: { type: String },
+  thursday: { type: String },
+  friday: { type: String },
+  saturday: { type: String },
+  sunday: { type: String }
+})
 
 // Main
 let clinicSchema = new mongoose.Schema({
   id: { type: String, length: 32, required: true },
   clinicName: { type: String, required: true },
-  schedule: { type: scheduleSchema, required: true },
-  address: { type: addressSchema, required: true },
+  schedule: { type: scheduleSchema },
+  address: { type: addressSchema },
 });
 
 let Clinic = mongoose.model("Clinic", clinicSchema);
