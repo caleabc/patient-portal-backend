@@ -1,10 +1,10 @@
-// Utils
-let storage = require("../utils/storage");
 
 // Models
 let MedicalRecord = require("../models/medicalRecord");
 let Patient = require("../models/patient")
 let AuthorizationData = require("../models/authorizationData")
+let Secretary = require("../models/secretary")
+let Doctor = require("../models/doctor")
 
 async function getMedicalRecordsByClinicId(req, res) {
   let authHeader = req.headers.authorization

@@ -7,7 +7,6 @@ const AuthorizationData = require("../models/authorizationData")
 
 // Utils
 const createAuthorizationToken = require("../utils/createAuthorizationToken");
-const createId = require("../utils/createId")
 
 async function verifyOtp(req, res) {
   let requestorId = req.body.requestorId;
@@ -97,7 +96,7 @@ async function verifyOtp(req, res) {
         
         await newAuthorizationData.save()
 
-        res.status(200).json({authorizationToken});
+        res.status(200).json({authorizationToken, role});
       } else {
         console.log("OTP is incorrect or expired");
         res.status(500).json({ message: "OTP is incorrect or expired" });

@@ -3,6 +3,8 @@ const Patient = require("../models/patient");
 const MedicalRecord = require("../models/medicalRecord");
 const PatientAccessCode = require("../models/patientAccessCode");
 const AuthorizationData = require("../models/authorizationData")
+const Secretary = require("../models/secretary")
+const Doctor = require("../models/doctor")
 
 // Utils
 const createId = require("../utils/createId");
