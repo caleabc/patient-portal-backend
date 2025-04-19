@@ -26,7 +26,20 @@ async function consultation(req, res) {
 
   try {
     let authorizationData = await AuthorizationData.findOne({authorizationToken})
-    clinicId = authorizationData.clinicId
+    let role = authorizationData.role
+    let id = authorizationData.id
+
+    if (role === "secretary"){
+      let secInformation = await Secretary.findOne({id})
+
+      clinicId = secInformation.clinicId
+    }
+
+    if (role === "doctor"){
+      let docInformation = await Doctor.findOne({id})
+
+      clinicId = docInformation.clinicId
+    }
 
     let patients = await Patient.find({ lastname: lastname.toLowerCase() });
 

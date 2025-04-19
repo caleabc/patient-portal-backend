@@ -14,8 +14,20 @@ async function getMedicalRecordsByClinicId(req, res) {
 
   try {
     let authorizationData = await AuthorizationData.findOne({authorizationToken})
+    let role = authorizationData.role
+    let id = authorizationData.id
 
-    clinicId = authorizationData.clinicId
+    if (role === "secretary"){
+      let secInformation = await Secretary.findOne({id})
+
+      clinicId = secInformation.clinicId
+    }
+
+    if (role === "doctor"){
+      let docInformation = await Doctor.findOne({id})
+
+      clinicId = docInformation.clinicId
+    }
 
     let patientsRecords = await MedicalRecord.find({ clinicId }).select('-photos').sort({ createdAt: -1 }).limit(50);
 
@@ -59,8 +71,20 @@ async function getMedicalRecordsBySearchQuery(req, res) {
 
   try {
     let authorizationData = await AuthorizationData.findOne({authorizationToken})
+    let role = authorizationData.role
+    let id = authorizationData.id
 
-    clinicId = authorizationData.clinicId
+    if (role === "secretary"){
+      let secInformation = await Secretary.findOne({id})
+
+      clinicId = secInformation.clinicId
+    }
+
+    if (role === "doctor"){
+      let docInformation = await Doctor.findOne({id})
+
+      clinicId = docInformation.clinicId
+    }
 
     let patientsRecords = await MedicalRecord.find({clinicId: clinicId, patientFirstAndLastName: { $regex: query, $options: 'i' }}).select('-photos').sort({ createdAt: -1 }).limit(50);
 

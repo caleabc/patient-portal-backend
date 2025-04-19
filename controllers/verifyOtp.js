@@ -109,7 +109,7 @@ async function verifyOtp(req, res) {
         
         await newAuthorizationData.save()
 
-        res.status(200).json(data);
+        res.status(200).json({authorizationToken});
       } else {
         console.log("OTP is incorrect or expired");
         res.status(500).json({ message: "OTP is incorrect or expired" });
