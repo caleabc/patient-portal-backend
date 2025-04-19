@@ -7,16 +7,14 @@ async function registerPhoneNumber(req, res) {
 
   console.log(req.body)
 
-  let { phoneNumber, clinicId, clinicName, firstname, lastname, role } = req.body;
+  let { phoneNumber, role, id, clinicId } = req.body;
 
   try {
     const newPhoneNumber = new PhoneNumber({
       phoneNumber,
-      clinicId,
-      clinicName,
-      firstname,
-      lastname,
-      role,
+      role, // secretary or doctor
+      id, // If role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
+      clinicId
     });
     await newPhoneNumber.save();
 
