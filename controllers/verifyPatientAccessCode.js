@@ -1,6 +1,6 @@
 
 // Model
-const PatientAccessCode = require("../models/otpData");
+const PatientAccessCode = require("../models/patientAccessCode");
 const AuthorizationData = require("../models/authorizationData")
 
 // Utils
@@ -8,6 +8,7 @@ let createAuthorizationToken = require("../utils/createAuthorizationToken")
 
 async function verifyPatientAccessCode(req, res) {
   try {
+    
     const response = await PatientAccessCode.findOne({ accessCode: req.body.patientAccessCode});
 
     if (response === null) {
@@ -31,7 +32,7 @@ async function verifyPatientAccessCode(req, res) {
 
       await newAuthorizationData.save()
 
-      res.status(200).json({ message: "Patient access code is correct", authorizationToken:authorizationToken, role:role });
+      res.status(200).json({authorizationToken, role, id:patientId });
     }
   } catch (error) {
     console.log(error)

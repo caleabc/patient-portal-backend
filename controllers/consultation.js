@@ -106,7 +106,7 @@ async function consultation(req, res) {
         lastname: lastname.toLowerCase(),
         dateOfBirth,
         gender,
-        mobile: phoneNumber,
+        phoneNumber: phoneNumber,
       });
 
       await newPatient.save();
