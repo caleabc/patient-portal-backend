@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 // controllers
-let { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordsBySearchQuery, updateMedicalRecordById } = require("../controllers/medicalRecord");
+let { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordsByPatientId, getMedicalRecordsByPatientIdBySearchQuery, getMedicalRecordsBySearchQuery, updateMedicalRecordById } = require("../controllers/medicalRecord");
 
 // Middleware
 const isAuthorized = require("../middleware/isAuthorized");
@@ -18,6 +18,18 @@ router.get(
   "/medical-record/:id",
   isAuthorized,
   getMedicalRecordById
+);
+
+router.post(
+  "/medical-records-by-patient-id",
+  isAuthorized,
+  getMedicalRecordsByPatientId
+);
+
+router.post(
+  "/medical-records-by-patient-id-by-search-query",
+  isAuthorized,
+  getMedicalRecordsByPatientIdBySearchQuery
 );
 
 router.get(

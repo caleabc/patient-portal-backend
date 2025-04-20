@@ -10,6 +10,8 @@ let phoneNumberSchema = new mongoose.Schema({
   role: { type: String, required: true }, // secretary or doctor
   id: { type: String, length: 32, required: true }, // If role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
   clinicId: { type: String, length: 32, required: true },
+  firstname: { type: String },
+  lastname: { type: String }
 });
 
 let PhoneNumber = mongoose.model("PhoneNumber", phoneNumberSchema);

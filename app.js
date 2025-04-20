@@ -8,6 +8,7 @@ dotenv.config(); // Load .env file
 // Routes
 const sendOtp = require("./routes/sendOtp");
 const verifyOtp = require("./routes/verifyOtp")
+const verifyPatientAccessCode = require("./routes/verifyPatientAccessCode")
 const consultation = require("./routes/consultation")
 const registerPhoneNumber = require("./routes/registerPhoneNumber")
 const medicalRecord = require("./routes/medicalRecord")
@@ -41,6 +42,7 @@ dbConfiguration()
 // Use routes
 app.use(sendOtp)
 app.use(verifyOtp)
+app.use(verifyPatientAccessCode)
 app.use(consultation)
 app.use(registerPhoneNumber)
 app.use(medicalRecord)

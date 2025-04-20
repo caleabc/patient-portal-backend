@@ -65,6 +65,9 @@ async function verifyOtp(req, res) {
         let id = info.id // If role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
         let clinicId = info.clinicId
 
+        let firstname = info.firstname
+        let lastname = info.lastname
+
         /*
         
         A secretary or a doctor on their first sending and verifying of OTP they don't have a record on user information to be specific secretary schema or doctor schema
@@ -76,7 +79,7 @@ async function verifyOtp(req, res) {
           if (userInformation === null){
             // On this part, it's their first time, then do create a record
 
-            let newSecretary = new Secretary({id, clinicId, phoneNumber});
+            let newSecretary = new Secretary({id, clinicId, phoneNumber, firstname, lastname});
             await newSecretary.save()
           }
         }
@@ -87,7 +90,7 @@ async function verifyOtp(req, res) {
           if (userInformation === null){
             // On this part, it's their first time, then do create a record
 
-            let newDoctor = new Doctor({id, clinicId, phoneNumber});
+            let newDoctor = new Doctor({id, clinicId, phoneNumber, firstname, lastname});
             await newDoctor.save()
           }
         }

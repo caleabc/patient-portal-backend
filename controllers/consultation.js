@@ -128,11 +128,18 @@ async function consultation(req, res) {
 
       await newMedicalRecord.save();
 
-      if (phoneNumber === undefined) {
+      if (phoneNumber === "") {
         // No phone number provided
-        res
-          .status(200)
-          .json({ message: "Patient consultation successfully saved" });
+        res.status(200).json({ message: "Patient consultation successfully saved" });
+        
+        let newPatientAccessCode = new PatientAccessCode({
+          accessCode: accessCode,
+          patientId: patientId,
+        });
+  
+        // Save the access code to DB
+        newPatientAccessCode.save();
+
         return;
       }
 
@@ -156,7 +163,7 @@ async function consultation(req, res) {
         recipient: phoneNumber,
         sender_id: senderId,
         type: "plain",
-        message: `Your access code is: ${accessCode}. You can use it to login in health record.`,
+        message: `Your access code is: ${accessCode}. You can use it to login.`,
       };
 
       const response = await fetch(url, {
