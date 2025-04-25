@@ -90,7 +90,7 @@ async function sendOtp(req, res) {
         res.status(200).json({ message: "OTP sent." });
       }
     } else {
-      let maxAllowedOtpRequestPerMonth = 10;
+      let maxAllowedOtpRequestPerMonth = 30;
 
       if (otpData.otps.length === maxAllowedOtpRequestPerMonth) {
         

@@ -1,6 +1,7 @@
-import CryptoJS from "crypto-js";
+// Lib
+const CryptoJS = require("crypto-js");
 
-export function encrypt(data, key) {
+function encrypt(data, key) {
   if (key.length !== 32) {
     throw new Error(
       "Encryption key must be a 32-character length truly random string like 'thbfsdfgfdejkjkycvbnmngfqwaiazbm' "
@@ -17,7 +18,7 @@ export function encrypt(data, key) {
   return encrypted;
 }
 
-export function decrypt(encryptedData, key) {
+function decrypt(encryptedData, key) {
   // The placement of parameters or arguments in CryptoJS.AES.decrypt() cannot be interchanged
 
   // Decrypt the data
@@ -48,3 +49,8 @@ let sampleEncryptionKey = 'thbfsdfgfdejkjkycvbnmngfqwaiazbm'
 let encryptedData = encrypt(data, sampleEncryptionKey);
 let decryptedData = decrypt(encryptedData, sampleEncryptionKey);
 */
+
+
+module.exports = {encrypt, decrypt}
+
+

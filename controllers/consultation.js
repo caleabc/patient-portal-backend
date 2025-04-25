@@ -11,9 +11,9 @@ const createId = require("../utils/createId");
 const createAccessCode = require("../utils/createAccessCode");
 
 async function consultation(req, res) {
+
   let {
     reasonForConsultation,
-    imgsToBase64String,
     firstname,
     lastname,
     dateOfBirth,
@@ -23,6 +23,8 @@ async function consultation(req, res) {
 
   let authHeader = req.headers.authorization;
   let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
+
+  let medicalRecordId = createId()
 
   let clinicId;
 
@@ -71,13 +73,12 @@ async function consultation(req, res) {
       */
 
       let newMedicalRecord = new MedicalRecord({
-        id: createId(),
+        id: medicalRecordId,
         patientId,
         patientFirstAndLastName:
           firstname.toLowerCase() + " " + lastname.toLowerCase(), // Why this field is here?
         clinicId,
         reasonForConsultation,
-        photos: imgsToBase64String,
       });
 
       await newMedicalRecord.save();
@@ -89,7 +90,7 @@ async function consultation(req, res) {
       */
       res
         .status(200)
-        .json({ message: "Patient consultation successfully saved" });
+        .json({medicalRecordId:medicalRecordId, message: "Patient consultation successfully saved" });
     } else {
       /*
       
@@ -117,20 +118,21 @@ async function consultation(req, res) {
     
       */
       let newMedicalRecord = new MedicalRecord({
-        id: createId(),
+        id: medicalRecordId,
         patientId: patientId,
         patientFirstAndLastName:
           firstname.toLowerCase() + " " + lastname.toLowerCase(), // Why this field is here?
         clinicId,
         reasonForConsultation,
-        photos: imgsToBase64String,
       });
 
       await newMedicalRecord.save();
 
-      if (phoneNumber === "") {
+      let accessCode = createAccessCode();
+
+      if (phoneNumber === "+63") {
         // No phone number provided
-        res.status(200).json({ message: "Patient consultation successfully saved" });
+        res.status(200).json({medicalRecordId, message: "Patient consultation successfully saved" });
         
         let newPatientAccessCode = new PatientAccessCode({
           accessCode: accessCode,
@@ -152,8 +154,6 @@ async function consultation(req, res) {
       Uses PhilSMS api
 
       */
-
-      let accessCode = createAccessCode();
 
       const url = "https://app.philsms.com/api/v3/sms/send";
       const apiToken = process.env.PHILSMS_API_TOKEN;
@@ -192,7 +192,7 @@ async function consultation(req, res) {
 
       res
         .status(200)
-        .json({ message: "Patient consultation successfully saved" });
+        .json({medicalRecordId, message: "Patient consultation successfully saved" });
     }
   } catch (error) {
     console.log(error);

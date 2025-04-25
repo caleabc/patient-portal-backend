@@ -1,6 +1,6 @@
 // Created by me but improved by chatGPT
 function isImgToBase64StringValid(imgToBase64String) {
-  const maxSizeMB = 10;
+  const maxSizeMB = 2;
   const allowedMimeTypes = ['png', 'jpeg', 'jpg', 'gif'];
 
   // Check for valid Base64 format (prefix + base64 data)
@@ -48,7 +48,7 @@ function isImgToBase64StringValidv1(imgToBase64String) {
     Checking the size
 
   */
-  let maxSizeMB = 10;
+  let maxSizeMB = 2;
 
   // Remove the data URL part (e.g., 'data:image/png;base64,')
   const base64Data = imgToBase64String.split(",")[1];
@@ -80,7 +80,6 @@ function isImgToBase64StringValidv1(imgToBase64String) {
 function validateAndSanitizeInputsForConsultation(req, res, next) {
   let keys = [
     "reasonForConsultation",
-    "imgsToBase64String",
     "firstname",
     "lastname",
     "dateOfBirth",

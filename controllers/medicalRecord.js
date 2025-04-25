@@ -46,12 +46,30 @@ async function getMedicalRecordById(req, res) {
   const { id } = req.params;
 
   try {
-    let medicalRecord = await MedicalRecord.findOne({ id });
+    let medicalRecord = await MedicalRecord.findOne({ id }).select('-photos');
 
     let patientId = medicalRecord.patientId
     let patientInformation = await Patient.findOne({ id:patientId });
+    patientInformation = patientInformation.decrypt();
 
     res.status(200).json({medicalRecord, patientInformation});
+  } catch (error) {
+    console.log(error);
+    console.log("Error in getting patient medical record");
+    res
+      .status(500)
+      .json({ message: "Error in getting patient medical record" });
+  }
+}
+
+async function getMedicalRecordWithPhotosById(req, res) {
+
+  const { id } = req.params;
+
+  try {
+    let medicalRecord = await MedicalRecord.findOne({ id });
+
+    res.status(200).json(medicalRecord);
   } catch (error) {
     console.log(error);
     console.log("Error in getting patient medical record");
@@ -139,13 +157,35 @@ async function updateMedicalRecordById(req, res) {
   const { id } = req.params;
 
   try {
+    /*
+    
+    This update is only for photos section (imgsToBase64String), the reason why it is design this way is because when submitting the consultation information because of the size of files (basically photos) it takes a bit long and that's make the submission a bit slow, so the work around is send the medical consultation information without the photos (imgsToBase64String) then do a second request, send the photos and this time we will no longer wait basically do this in the background
+
+    */
+
+    let imgToBase64String = req.body.imgToBase64String
+    
+    if (imgToBase64String !== undefined){
+
+      try {
+        await MedicalRecord.findOneAndUpdate({id:id}, { $push: { photos: imgToBase64String } })
+
+        res.status(200).json({ message: "Photo converted to base64String saved" });
+      } catch (error){
+        console.log("thgthgvbnmnbvbn")
+        console.log(error)
+      }
+      
+      return
+    }
+
     let authorizationData = await AuthorizationData.findOne({authorizationToken})
 
     let role = authorizationData.role
 
     /*
   
-    Only the doctor can update the medical record
+    Only the doctor can update the diagnosis, remarks, lab request and prescription sections of medical record
 
     */
     if (role !== "doctor"){
@@ -155,10 +195,32 @@ async function updateMedicalRecordById(req, res) {
       return
     }
 
-    let {diagnosis, remarks} = req.body
-    let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {diagnosis, remarks}, {new:true}) // {new:true} This returns the updated document instead of the old one
+    let {diagnosis, remarks, labRequest, prescription} = req.body
 
-    res.status(200).json(updatedMedicalRecord);
+    if (diagnosis !== undefined){
+      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {diagnosis}, {new:true}) // {new:true} This returns the updated document instead of the old one
+      res.status(200).json(updatedMedicalRecord);
+      return
+    }
+
+    if (remarks !== undefined){
+      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {remarks}, {new:true}) // {new:true} This returns the updated document instead of the old one
+      res.status(200).json(updatedMedicalRecord);
+      return
+    }
+
+    if (labRequest !== undefined){
+      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {labRequest}, {new:true}) // {new:true} This returns the updated document instead of the old one
+      res.status(200).json(updatedMedicalRecord);
+      return
+    }
+
+    if (prescription !== undefined){
+      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {prescription}, {new:true}) // {new:true} This returns the updated document instead of the old one
+      res.status(200).json(updatedMedicalRecord);
+      return
+    }
+
   } catch (error) {
     console.log(error);
     console.log("Error in updating patient medical record");
@@ -168,4 +230,7 @@ async function updateMedicalRecordById(req, res) {
   }
 }
 
-module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordsByPatientId, getMedicalRecordsByPatientIdBySearchQuery, getMedicalRecordsBySearchQuery, updateMedicalRecordById };
+
+module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordWithPhotosById, getMedicalRecordsByPatientId, getMedicalRecordsByPatientIdBySearchQuery, getMedicalRecordsBySearchQuery, updateMedicalRecordById };
+
+
