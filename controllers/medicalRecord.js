@@ -1,35 +1,39 @@
-
 // Models
 let MedicalRecord = require("../models/medicalRecord");
-let Patient = require("../models/patient")
-let AuthorizationData = require("../models/authorizationData")
-let Secretary = require("../models/secretary")
-let Doctor = require("../models/doctor")
+let Patient = require("../models/patient");
+let AuthorizationData = require("../models/authorizationData");
+let Secretary = require("../models/secretary");
+let Doctor = require("../models/doctor");
 
 async function getMedicalRecordsByClinicId(req, res) {
-  let authHeader = req.headers.authorization
-  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+  let authHeader = req.headers.authorization;
+  let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
 
   let clinicId;
 
   try {
-    let authorizationData = await AuthorizationData.findOne({authorizationToken})
-    let role = authorizationData.role
-    let id = authorizationData.id
+    let authorizationData = await AuthorizationData.findOne({
+      authorizationToken,
+    });
+    let role = authorizationData.role;
+    let id = authorizationData.id;
 
-    if (role === "secretary"){
-      let secInformation = await Secretary.findOne({id})
+    if (role === "secretary") {
+      let secInformation = await Secretary.findOne({ id });
 
-      clinicId = secInformation.clinicId
+      clinicId = secInformation.clinicId;
     }
 
-    if (role === "doctor"){
-      let docInformation = await Doctor.findOne({id})
+    if (role === "doctor") {
+      let docInformation = await Doctor.findOne({ id });
 
-      clinicId = docInformation.clinicId
+      clinicId = docInformation.clinicId;
     }
 
-    let patientsRecords = await MedicalRecord.find({ clinicId }).select('-photos').sort({ createdAt: -1 }).limit(50);
+    let patientsRecords = await MedicalRecord.find({ clinicId })
+      .select("-photos")
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.status(200).json(patientsRecords);
   } catch (error) {
@@ -42,17 +46,16 @@ async function getMedicalRecordsByClinicId(req, res) {
 }
 
 async function getMedicalRecordById(req, res) {
-
   const { id } = req.params;
 
   try {
-    let medicalRecord = await MedicalRecord.findOne({ id }).select('-photos');
+    let medicalRecord = await MedicalRecord.findOne({ id }).select("-photos");
 
-    let patientId = medicalRecord.patientId
-    let patientInformation = await Patient.findOne({ id:patientId });
+    let patientId = medicalRecord.patientId;
+    let patientInformation = await Patient.findOne({ id: patientId });
     patientInformation = patientInformation.decrypt();
 
-    res.status(200).json({medicalRecord, patientInformation});
+    res.status(200).json({ medicalRecord, patientInformation });
   } catch (error) {
     console.log(error);
     console.log("Error in getting patient medical record");
@@ -63,7 +66,6 @@ async function getMedicalRecordById(req, res) {
 }
 
 async function getMedicalRecordWithPhotosById(req, res) {
-
   const { id } = req.params;
 
   try {
@@ -80,7 +82,6 @@ async function getMedicalRecordWithPhotosById(req, res) {
 }
 
 async function getMedicalRecordsByPatientId(req, res) {
-
   let { patientId } = req.body;
 
   try {
@@ -97,11 +98,16 @@ async function getMedicalRecordsByPatientId(req, res) {
 }
 
 async function getMedicalRecordsByPatientIdBySearchQuery(req, res) {
-
   let { patientId, query } = req.body;
 
   try {
-    let patientRecords = await MedicalRecord.find({patientId: patientId, reasonForConsultation: { $regex: query, $options: 'i' }}).select('-photos').sort({ createdAt: -1 }).limit(50);
+    let patientRecords = await MedicalRecord.find({
+      patientId: patientId,
+      reasonForConsultation: { $regex: query, $options: "i" },
+    })
+      .select("-photos")
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.status(200).json(patientRecords);
   } catch (error) {
@@ -114,31 +120,39 @@ async function getMedicalRecordsByPatientIdBySearchQuery(req, res) {
 }
 
 async function getMedicalRecordsBySearchQuery(req, res) {
-  let authHeader = req.headers.authorization
-  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+  let authHeader = req.headers.authorization;
+  let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
 
   let clinicId;
 
   let query = req.query.q;
 
   try {
-    let authorizationData = await AuthorizationData.findOne({authorizationToken})
-    let role = authorizationData.role
-    let id = authorizationData.id
+    let authorizationData = await AuthorizationData.findOne({
+      authorizationToken,
+    });
+    let role = authorizationData.role;
+    let id = authorizationData.id;
 
-    if (role === "secretary"){
-      let secInformation = await Secretary.findOne({id})
+    if (role === "secretary") {
+      let secInformation = await Secretary.findOne({ id });
 
-      clinicId = secInformation.clinicId
+      clinicId = secInformation.clinicId;
     }
 
-    if (role === "doctor"){
-      let docInformation = await Doctor.findOne({id})
+    if (role === "doctor") {
+      let docInformation = await Doctor.findOne({ id });
 
-      clinicId = docInformation.clinicId
+      clinicId = docInformation.clinicId;
     }
 
-    let patientsRecords = await MedicalRecord.find({clinicId: clinicId, patientFirstAndLastName: { $regex: query, $options: 'i' }}).select('-photos').sort({ createdAt: -1 }).limit(50);
+    let patientsRecords = await MedicalRecord.find({
+      clinicId: clinicId,
+      patientFirstAndLastName: { $regex: query, $options: "i" },
+    })
+      .select("-photos")
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.status(200).json(patientsRecords);
   } catch (error) {
@@ -151,8 +165,8 @@ async function getMedicalRecordsBySearchQuery(req, res) {
 }
 
 async function updateMedicalRecordById(req, res) {
-  let authHeader = req.headers.authorization
-  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+  let authHeader = req.headers.authorization;
+  let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
 
   const { id } = req.params;
 
@@ -163,64 +177,75 @@ async function updateMedicalRecordById(req, res) {
 
     */
 
-    let imgToBase64String = req.body.imgToBase64String
-    
-    if (imgToBase64String !== undefined){
+    let imgToBase64String = req.body.imgToBase64String;
 
+    if (imgToBase64String !== undefined) {
       try {
-        await MedicalRecord.findOneAndUpdate({id:id}, { $push: { photos: imgToBase64String } })
+        await MedicalRecord.findOneAndUpdate(
+          { id: id },
+          { $push: { photos: imgToBase64String } }
+        );
 
-        res.status(200).json({ message: "Photo converted to base64String saved" });
-      } catch (error){
-        console.log("thgthgvbnmnbvbn")
-        console.log(error)
+        res
+          .status(200)
+          .json({ message: "Photo converted to base64String saved" });
+      } catch (error) {
+        console.log("thgthgvbnmnbvbn");
+        console.log(error);
       }
-      
-      return
+
+      return;
     }
 
-    let authorizationData = await AuthorizationData.findOne({authorizationToken})
+    let authorizationData = await AuthorizationData.findOne({
+      authorizationToken,
+    });
 
-    let role = authorizationData.role
+    let role = authorizationData.role;
 
     /*
   
     Only the doctor can update the diagnosis, remarks, lab request and prescription sections of medical record
 
     */
-    if (role !== "doctor"){
+    if (role !== "doctor") {
       console.log("Unauthorized");
       res.status(500).json({ message: "Unauthorized" });
 
-      return
+      return;
     }
 
-    let {diagnosis, remarks, labRequest, prescription} = req.body
+    let { diagnosis, remarks, labRequest, prescription } = req.body;
 
-    if (diagnosis !== undefined){
-      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {diagnosis}, {new:true}) // {new:true} This returns the updated document instead of the old one
-      res.status(200).json(updatedMedicalRecord);
-      return
+    if (diagnosis !== undefined) {
+      await MedicalRecord.findOneAndUpdate({ id }, { diagnosis });
+      res.status(200).json("Medical diagnosis successfully saved");
+      return;
     }
 
-    if (remarks !== undefined){
-      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {remarks}, {new:true}) // {new:true} This returns the updated document instead of the old one
-      res.status(200).json(updatedMedicalRecord);
-      return
+    if (remarks !== undefined) {
+      await MedicalRecord.findOneAndUpdate({ id }, { remarks });
+      res.status(200).json("Medical remarks successfully saved");
+      return;
     }
 
-    if (labRequest !== undefined){
-      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {labRequest}, {new:true}) // {new:true} This returns the updated document instead of the old one
-      res.status(200).json(updatedMedicalRecord);
-      return
+    if (labRequest !== undefined) {
+      MedicalRecord.findOneAndUpdate(
+        { id },
+        { $push: { labRequest: labRequest } }
+      );
+      res.status(200).json("Medical lab request successfully saved");
+      return;
     }
 
-    if (prescription !== undefined){
-      let updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({id}, {prescription}, {new:true}) // {new:true} This returns the updated document instead of the old one
-      res.status(200).json(updatedMedicalRecord);
-      return
+    if (prescription !== undefined) {
+      await MedicalRecord.findOneAndUpdate(
+        { id },
+        { $push: { prescription: prescription } }
+      );
+      res.status(200).json("Medical prescription successfully saved");
+      return;
     }
-
   } catch (error) {
     console.log(error);
     console.log("Error in updating patient medical record");
@@ -230,7 +255,12 @@ async function updateMedicalRecordById(req, res) {
   }
 }
 
-
-module.exports = { getMedicalRecordsByClinicId, getMedicalRecordById, getMedicalRecordWithPhotosById, getMedicalRecordsByPatientId, getMedicalRecordsByPatientIdBySearchQuery, getMedicalRecordsBySearchQuery, updateMedicalRecordById };
-
-
+module.exports = {
+  getMedicalRecordsByClinicId,
+  getMedicalRecordById,
+  getMedicalRecordWithPhotosById,
+  getMedicalRecordsByPatientId,
+  getMedicalRecordsByPatientIdBySearchQuery,
+  getMedicalRecordsBySearchQuery,
+  updateMedicalRecordById,
+};
