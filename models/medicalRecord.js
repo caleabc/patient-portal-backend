@@ -31,6 +31,15 @@ let medicalRecordSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+/*
+
+Doing index can help prevent error like below,
+
+MongoServerError: Executor error during find command: test.medicalrecords :: caused by :: Sort exceeded memory limit of 33554432 bytes
+
+*/
+medicalRecordSchema.index({ clinicId: 1, createdAt: -1 });
+
 let MedicalRecord = mongoose.model("MedicalRecord", medicalRecordSchema);
 
 module.exports = MedicalRecord;

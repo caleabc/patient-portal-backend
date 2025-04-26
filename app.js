@@ -12,6 +12,7 @@ const verifyPatientAccessCode = require("./routes/verifyPatientAccessCode")
 const consultation = require("./routes/consultation")
 const registerPhoneNumber = require("./routes/registerPhoneNumber")
 const medicalRecord = require("./routes/medicalRecord")
+const account = require("./routes/account")
 
 // Create an Express application
 const app = express();
@@ -46,6 +47,7 @@ app.use(verifyPatientAccessCode)
 app.use(consultation)
 app.use(registerPhoneNumber)
 app.use(medicalRecord)
+app.use(account)
 
 const port = 5000;
 app.listen(port, function (){
