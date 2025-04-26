@@ -45,11 +45,17 @@ async function updateAccount(req, res) {
 
   try {
     if (role === "patient") {
-      
+      let {firstname, lastname} = req.body
+
+      let updatedAccount = await Patient.findOneAndUpdate({id}, { $set: { firstname, lastname } }, {new:true})
+      res.status(200).json(updatedAccount);
     }
 
     if (role === "secretary") {
-      
+      let {firstname, lastname} = req.body
+
+      let updatedAccount = await Secretary.findOneAndUpdate({id}, { $set: { firstname, lastname } }, {new:true})
+      res.status(200).json(updatedAccount);
     }
 
     if (role === "doctor") {
