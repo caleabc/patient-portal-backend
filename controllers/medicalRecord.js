@@ -46,7 +46,14 @@ async function getMedicalRecordsByClinicId(req, res) {
 }
 
 async function getMedicalRecordById(req, res) {
+  // This is the medical record id
   const { id } = req.params;
+
+  let authHeader = req.headers.authorization
+  let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
+
+  let authorizationData = await AuthorizationData.findOne({authorizationToken})
+  let doctorId = authorizationData.id
 
   try {
     let medicalRecord = await MedicalRecord.findOne({ id }).select("-photos");
@@ -55,7 +62,9 @@ async function getMedicalRecordById(req, res) {
     let patientInformation = await Patient.findOne({ id: patientId });
     patientInformation = patientInformation.decrypt();
 
-    res.status(200).json({ medicalRecord, patientInformation });
+    let doctorInformation = await Doctor.findOne({id:doctorId})
+
+    res.status(200).json({ medicalRecord, doctorInformation, patientInformation });
   } catch (error) {
     console.log(error);
     console.log("Error in getting patient medical record");
@@ -232,7 +241,7 @@ async function updateMedicalRecordById(req, res) {
     if (labRequest !== undefined) {
       MedicalRecord.findOneAndUpdate(
         { id },
-        { $push: { labRequest: labRequest } }
+        { $push: { labRequests: labRequest } }
       );
       res.status(200).json("Medical lab request successfully saved");
       return;
@@ -241,7 +250,7 @@ async function updateMedicalRecordById(req, res) {
     if (prescription !== undefined) {
       await MedicalRecord.findOneAndUpdate(
         { id },
-        { $push: { prescription: prescription } }
+        { $push: { prescriptions: prescription } }
       );
       res.status(200).json("Medical prescription successfully saved");
       return;

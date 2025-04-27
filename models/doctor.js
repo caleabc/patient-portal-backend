@@ -9,6 +9,7 @@ let doctorSchema = new mongoose.Schema({
   dateOfBirth: { type: String},
   gender: { type: String},
   phoneNumber: { type: String, required: true }, // Example. "+639123456789"
+  doctorSignature: { type: String }, // Photo in base64String
   clinicId: { type: String, length: 32, required: true }, // This is a reference from clinic model
 });
 

@@ -5,14 +5,14 @@ let labRequestSchema = new mongoose.Schema({
   doctorId: { type: String, length: 32, required: true },
   laboratoryTestsRequested: { type: String, required: true },
   instructionsToLaboratory: { type: String },
-  doctorSignature: { type: String, required: true } // Photo in base64String
+  doctorSignature: { type: String } // Photo in base64String
 });
 
 let prescriptionSchema = new mongoose.Schema({
   id: { type: String, length: 32, required: true },
   doctorId: { type: String, length: 32, required: true },
   medicationInformation: { type: String, required: true },
-  doctorSignature: { type: String, required: true } // Photo in base64String
+  doctorSignature: { type: String } // Photo in base64String
 });
 
 // Main
@@ -24,9 +24,9 @@ let medicalRecordSchema = new mongoose.Schema({
   clinicId: { type: String, length: 32, required: true }, // This is a reference from clinic model
   reasonForConsultation: { type: String, required: true },
   photos: [{ type: String }], // Photos in base64String
-  labRequest: [{ type: labRequestSchema }],
+  labRequests: [{ type: labRequestSchema }],
   diagnosis: { type: String },
-  prescription: [{ type: prescriptionSchema }],
+  prescriptions: [{ type: prescriptionSchema }],
   remarks: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
