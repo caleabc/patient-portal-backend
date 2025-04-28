@@ -239,10 +239,11 @@ async function updateMedicalRecordById(req, res) {
     }
 
     if (labRequest !== undefined) {
-      MedicalRecord.findOneAndUpdate(
+      await MedicalRecord.findOneAndUpdate(
         { id },
         { $push: { labRequests: labRequest } }
       );
+
       res.status(200).json("Medical lab request successfully saved");
       return;
     }

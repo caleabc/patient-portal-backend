@@ -3,16 +3,26 @@ let mongoose = require("mongoose");
 let labRequestSchema = new mongoose.Schema({
   id: { type: String, length: 32, required: true },
   doctorId: { type: String, length: 32, required: true },
+  doctorFirstname: { type: String, required: true },
+  doctorLastname: { type: String, required: true },
+  doctorSpecialty: { type: String, required: true },
+  doctorLicenseNumber: { type: String, required: true },
   laboratoryTestsRequested: { type: String, required: true },
   instructionsToLaboratory: { type: String },
-  doctorSignature: { type: String } // Photo in base64String
+  doctorSignature: { type: String }, // Photo in base64String
+  createdAt: { type: Date, default: Date.now },
 });
 
 let prescriptionSchema = new mongoose.Schema({
   id: { type: String, length: 32, required: true },
   doctorId: { type: String, length: 32, required: true },
+  doctorFirstname: { type: String, required: true },
+  doctorLastname: { type: String, required: true },
+  doctorSpecialty: { type: String, required: true },
+  doctorLicenseNumber: { type: String, required: true },
   medicationInformation: { type: String, required: true },
-  doctorSignature: { type: String } // Photo in base64String
+  doctorSignature: { type: String }, // Photo in base64String
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Main
