@@ -11,6 +11,7 @@ let labRequestSchema = new mongoose.Schema({
   instructionsToLaboratory: { type: String },
   doctorSignature: { type: String }, // Photo in base64String
   createdAt: { type: Date, default: Date.now },
+  labRequestToImageToBase64String: { type: String }
 });
 
 let prescriptionSchema = new mongoose.Schema({
@@ -23,6 +24,7 @@ let prescriptionSchema = new mongoose.Schema({
   medicationInformation: { type: String, required: true },
   doctorSignature: { type: String }, // Photo in base64String
   createdAt: { type: Date, default: Date.now },
+  prescriptionToImageToBase64String: { type: String }
 });
 
 // Main
