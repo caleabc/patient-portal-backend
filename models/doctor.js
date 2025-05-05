@@ -16,3 +16,5 @@ let doctorSchema = new mongoose.Schema({
 let Doctor = mongoose.model("Doctor", doctorSchema);
 
 module.exports = Doctor;
+
+

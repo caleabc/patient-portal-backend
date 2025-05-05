@@ -79,6 +79,8 @@ async function consultation(req, res) {
           firstname.toLowerCase() + " " + lastname.toLowerCase(), // Why this field is here?
         clinicId,
         reasonForConsultation,
+        diagnosis: "",
+        remarks: ""
       });
 
       await newMedicalRecord.save();
@@ -124,6 +126,8 @@ async function consultation(req, res) {
           firstname.toLowerCase() + " " + lastname.toLowerCase(), // Why this field is here?
         clinicId,
         reasonForConsultation,
+        diagnosis: "",
+        remarks: "",
       });
 
       await newMedicalRecord.save();

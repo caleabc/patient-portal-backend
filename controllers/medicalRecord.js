@@ -239,6 +239,29 @@ async function updateMedicalRecordById(req, res) {
     }
 
     if (labRequest !== undefined) {
+
+      
+      let isLabRequestExisted = await MedicalRecord.findOne({id: id, "labRequests.id": labRequest.id});
+
+      if (isLabRequestExisted){
+        /*
+        
+        Update lab request
+
+        */
+        let aa = await MedicalRecord.updateOne({ id: id, "labRequests.id": labRequest.id }, {$set: {"labRequests.$": labRequest}});
+
+        console.log("yhyhy", aa)
+
+        res.status(200).json("Medical lab request successfully updated");
+        return;
+      }
+
+      /*
+      
+      Add lab request
+
+      */
       await MedicalRecord.findOneAndUpdate(
         { id },
         { $push: { labRequests: labRequest } }
@@ -249,6 +272,25 @@ async function updateMedicalRecordById(req, res) {
     }
 
     if (prescription !== undefined) {
+      let isPrescriptionExisted = await MedicalRecord.findOne({id: id, "prescriptions.id": prescription.id});
+
+      if (isPrescriptionExisted){
+        /*
+        
+        Update prescription
+
+        */
+        await MedicalRecord.updateOne({ id: id, "prescriptions.id": prescription.id }, {$set: {"prescriptions.$": prescription}});
+
+        res.status(200).json("Medical prescription successfully updated");
+        return;
+      }
+
+      /*
+      
+      Add prescription
+
+      */
       await MedicalRecord.findOneAndUpdate(
         { id },
         { $push: { prescriptions: prescription } }
