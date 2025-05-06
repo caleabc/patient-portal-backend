@@ -62,9 +62,9 @@ async function updateAccount(req, res) {
     }
 
     if (role === "doctor") {
-      let {firstname, lastname, specialty, licenseNumber} = req.body
+      let {firstname, lastname, specialty, licenseNumber, doctorSignature} = req.body
 
-      let updatedAccount = await Doctor.findOneAndUpdate({id}, { $set: { firstname, lastname, specialty, licenseNumber } }, {new:true})
+      let updatedAccount = await Doctor.findOneAndUpdate({id}, { $set: { firstname, lastname, specialty, licenseNumber, doctorSignature } }, {new:true})
       res.status(200).json(updatedAccount);
     }
 
