@@ -12,6 +12,9 @@ async function account(req, res) {
     if (role === "patient") {
       let account = await Patient.findOne({ id });
 
+      // Decrypt
+      account = account.decrypt();
+
       res.status(200).json(account);
     }
 

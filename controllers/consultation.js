@@ -9,6 +9,7 @@ const Doctor = require("../models/doctor")
 // Utils
 const createId = require("../utils/createId");
 const createAccessCode = require("../utils/createAccessCode");
+const hash = require("../utils/hash")
 
 async function consultation(req, res) {
 
@@ -28,6 +29,10 @@ async function consultation(req, res) {
 
   let clinicId;
 
+  let hashedLastnameSecret = process.env.HASHED_LASTNAME_SECRET;
+
+  let hashedLastname = hash(lastname + hashedLastnameSecret)
+
   try {
     let authorizationData = await AuthorizationData.findOne({authorizationToken})
     let role = authorizationData.role
@@ -45,13 +50,16 @@ async function consultation(req, res) {
       clinicId = docInformation.clinicId
     }
 
-    let patients = await Patient.find({ lastname: lastname.toLowerCase() });
+    let patients = await Patient.find({ hashedLastname });
 
     let isCurrentPatientExisting = false;
     let patientId = null;
 
     for (let i = 0; i < patients.length; i++) {
       let patient = patients[i];
+
+      // Decrypt
+      patient = patient.decrypt();
 
       if (
         patient["lastname"] === lastname.toLowerCase() &&
@@ -71,6 +79,8 @@ async function consultation(req, res) {
       Existing patient
 
       */
+
+     console.log({isCurrentPatientExisting})
 
       let newMedicalRecord = new MedicalRecord({
         id: medicalRecordId,
@@ -100,6 +110,8 @@ async function consultation(req, res) {
 
       */
 
+      console.log({isCurrentPatientExisting})
+
       // There is already patientId variable above so we will just update the value of it.
       patientId = createId();
 
@@ -107,6 +119,7 @@ async function consultation(req, res) {
         id: patientId,
         firstname: firstname.toLowerCase(),
         lastname: lastname.toLowerCase(),
+        hashedLastname,
         dateOfBirth,
         gender,
         phoneNumber: phoneNumber,
