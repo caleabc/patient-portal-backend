@@ -13,7 +13,8 @@ async function dbConfiguration() {
     await mongoose.connect(uri);
     console.log("MongoDB connected");
   } catch (error) {
-    console.log("MongoDB connection error:", error);
+    console.log(error)
+    console.log("MongoDB connection error");
   }
 }
 
