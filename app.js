@@ -1,7 +1,12 @@
 // Lib
 const express = require("express")
-const rateLimit = require('express-rate-limit');
-const cors = require('cors')
+const mongoSanitize = require("express-mongo-sanitize")
+const cookieParser = require("cookie-parser")
+const sanitizeRequest = require("./middleware/sanitizeRequest");
+const limiter = require("./middleware/limiter")
+const helmetSetting = require("./middleware/helmetSetting")
+const corsSetting = require("./middleware/corsSetting")
+const dbConfiguration = require("./databaseConfiguration");
 const dotenv = require("dotenv")
 dotenv.config(); // Load .env file
 
@@ -18,25 +23,25 @@ const account = require("./routes/account")
 const app = express();
 
 // Middleware to parse JSON request bodies
-app.use(express.json({ limit: '50mb' })); // Request body size
+app.use(express.json());
 
-// Allow access to ...
-app.use(cors())
-
-// To prevent our backend (server) from abuse, added request limit
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `windowMs`
-  message: "Too many requests from this IP, please try again later.",
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-
-// Apply the rate limiter to all requests
+// To prevent our backend / server from abuse, added request limit
 app.use(limiter);
 
-// Database configuration
-const dbConfiguration = require("./databaseConfiguration")
+// sanitize request to protect from nosql and xss attack
+app.use(sanitizeRequest)
+
+app.use(mongoSanitize());
+
+// if happens that this server is sending some harmful code then instruct the browser to not run it, this way we are protecting ourselves from xss
+app.use(helmetSetting)
+
+// telling the browser that this sites (eg. www.a.com, www.h.com) are only allowed to read my response
+app.use(corsSetting)
+
+// required lib so that we can do res.cookie and req.cookies later
+app.use(cookieParser());
+
 // Run DB
 dbConfiguration()
 
@@ -53,5 +58,4 @@ const port = 5000;
 app.listen(port, function (){
   console.log("Server is now running...");
 })
-
 

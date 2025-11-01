@@ -10,7 +10,6 @@ const createAuthorizationToken = require("../utils/createAuthorizationToken");
 
 async function verifyOtp(req, res) {
   let requestorId = req.body.requestorId;
-  let phoneNumber = req.body.phoneNumber;
   let otpFromUser = req.body.otp;
 
   try {
@@ -18,6 +17,8 @@ async function verifyOtp(req, res) {
     if (requestorId === undefined || phoneNumber === undefined) {
       console.log("Invalid request");
       res.status(500).json({ message: "Invalid request" });
+
+      return
     }
 
     const otpData = await OtpData.findOne({ requestorId });
