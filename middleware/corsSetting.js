@@ -6,7 +6,7 @@ const corsSetting = cors({
   // Use an array to allow multiple frontends (e.g., production + localhost for dev)
   origin: [
     "https://your-frontend.com", // production frontend
-    "http://localhost:3000", // local React dev server
+    "http://localhost:3000", // local frontend/client
   ],
 
   // ✅ Allow sending cookies and auth headers

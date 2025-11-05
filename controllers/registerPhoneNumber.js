@@ -7,13 +7,13 @@ async function registerPhoneNumber(req, res) {
 
   console.log(req.body)
 
-  let { phoneNumber, role, id, clinicId, firstname, lastname } = req.body;
+  let { phoneNumber, role, userId, clinicId, firstname, lastname } = req.body;
 
   try {
     const newPhoneNumber = new PhoneNumber({
       phoneNumber,
       role, // secretary or doctor
-      id, // If role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
+      userId, // If role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
       clinicId,
       firstname,
       lastname

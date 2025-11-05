@@ -1,23 +1,15 @@
-// Models
-const AuthorizationData = require("../models/authorizationData")
 
 async function isAuthorized (req, res, next){
-    let authHeader = req.headers.authorization
-    let authorizationToken = authHeader && authHeader.split(' ')[1]; // Gets just the token part
 
-    let authorizationData = await AuthorizationData.findOne({authorizationToken})
+    const authorizationToken = req.cookies.authorizationToken;
 
-    if (authorizationData === null){
-        console.log("Unauthorized")
-        
-        res.status(500).json({ error: "Unauthorized" });
-        
-        return
+    if (authorizationToken === undefined){
+        console.log("no authorization token found")
+        res.status(400).json({ error: "Unauthorized" });
     } else {
         next()
     }
 }
 
 module.exports = isAuthorized;
-
 

@@ -3,9 +3,12 @@ const express = require("express");
 const router = express.Router();
 
 // controllers
-let sendOtp = require("../controllers/sendOtp");
+const sendOtp = require("../controllers/sendOtp");
 
-router.post("/send-otp", sendOtp);
+// middleware
+const sendOtpLimiter = require("../middleware/sendOtpLimiter")
+
+router.post("/send-otp", sendOtpLimiter, sendOtp);
 
 module.exports = router;
 

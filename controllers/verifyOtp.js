@@ -1,12 +1,16 @@
+// Lib
+const jwt = require('jsonwebtoken');
+
 // Models
-const OtpData = require("../models/otpData");
+const OtpObject = require("../models/otpObject");
 const PhoneNumber = require("../models/phoneNumber");
-const Secretary = require("../models/secretary")
-const Doctor = require("../models/doctor")
-const AuthorizationData = require("../models/authorizationData")
+const Secretary = require("../models/secretary");
+const Doctor = require("../models/doctor");
+const AuthorizationData = require("../models/authorizationData");
 
 // Utils
 const createAuthorizationToken = require("../utils/createAuthorizationToken");
+const createId = require("../utils/createId");
 
 async function verifyOtp(req, res) {
   let requestorId = req.body.requestorId;
@@ -14,97 +18,65 @@ async function verifyOtp(req, res) {
 
   try {
     //Early check
-    if (requestorId === undefined || phoneNumber === undefined) {
-      console.log("Invalid request");
-      res.status(500).json({ message: "Invalid request" });
+    if (requestorId === undefined || otpFromUser === undefined) {
+      console.log("Bad request");
+      res.status(400).json({ message: "Bad request" });
 
-      return
+      return;
     }
 
-    const otpData = await OtpData.findOne({ requestorId });
+    const otpObject = await OtpObject.findOne({ requestorId: requestorId });
 
-    if (otpData === null) {
-      console.log("Invalid request");
-      res.status(500).json({ message: "Invalid request" });
-    } else {
-      /*
+    if (otpObject === null) {
+      console.log("Requestor id not found");
+      res.status(400).json({ message: "Requestor id not found" });
+
+      return;
+    }
+
+    const userId = otpObject.userId;
+    const role = otpObject.role;
+
+    if (otpObject.otp === otpFromUser) {
+      // on this part otp object is valid
+
+      // get user information
+      let userInformation = undefined;
+
+      if (role === "Patient") {
+        userInformation = await Patient.findOne({ id: userId });
+      }
+
+      if (role === "Secretary") {
+        userInformation = await Secretary.findOne({ id: userId });
+      }
+
+      if (role === "Doctor") {
+        userInformation = await Doctor.findOne({ id: userId });
+      }
+
+      // we need to remove the saved otp object now since the otp object is a one-time use only
+      await OtpObject.findOneAndDelete({ requestorId: requestorId });
+
+      const payload = { role:role, userId: userId };
+      const jwtSecretKey = process.env.JWT_SECRET_KEY;
       
-      Use the latest inserted otp
+      let authorizationToken = jwt.sign(payload, jwtSecretKey);
 
-      */
+      // calculation for approximately 1 month (30 days)
+      const oneMonthInMilliseconds = 1000 * 60 * 60 * 24 * 30;
 
-      let latestInsertedOtp = otpData.otps[otpData.otps.length - 1];
-      let createdAt = latestInsertedOtp.createdAt; // This is a Date object
-      createdAt = new Date(createdAt).getTime(); // Convert to milliseconds
+      res.cookie("authorizationToken", authorizationToken, {
+        httpOnly: true, // not accessible by JavaScript
+        // secure: true, // HTTPS only
+        secure: process.env.NODE_ENV === 'production', // false in development
+        sameSite: "Strict", // only sent for same-site requests
+        maxAge: oneMonthInMilliseconds,
+      });
 
-      let isOtpExist = false;
-
-      if (latestInsertedOtp.otp === Number(otpFromUser)) {
-        isOtpExist = true;
-      }
-
-      // Every otp has only 60 minutes from the time created
-      let isOtpNotExpired = false;
-      let now = new Date();
-      let sixtyMinutes = 60 * 60 * 1000; // 60 minutes in milliseconds
-      if (now - createdAt <= sixtyMinutes) {
-        isOtpNotExpired = true;
-      }
-
-      if (isOtpExist === true && isOtpNotExpired === true) {
-        /*
-        
-        OTP is valid then issue authorization token
-
-        */
-
-        let authorizationToken = createAuthorizationToken();
-
-        let info = await PhoneNumber.findOne({ phoneNumber });
-
-        let role = info.role
-        let id = info.id // If role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
-        let clinicId = info.clinicId
-
-        let firstname = info.firstname
-        let lastname = info.lastname
-
-        /*
-        
-        A secretary or a doctor on their first sending and verifying of OTP they don't have a record on user information to be specific secretary schema or doctor schema
-        
-        */
-        if (role === "secretary") {
-          let userInformation = await Secretary.findOne({ phoneNumber });
-
-          if (userInformation === null){
-            // On this part, it's their first time, then do create a record
-
-            let newSecretary = new Secretary({id, clinicId, phoneNumber, firstname, lastname});
-            await newSecretary.save()
-          }
-        }
-
-        if (role === "doctor") {
-          let userInformation = await Doctor.findOne({ phoneNumber });
-
-          if (userInformation === null){
-            // On this part, it's their first time, then do create a record
-
-            let newDoctor = new Doctor({id, clinicId, phoneNumber, firstname, lastname});
-            await newDoctor.save()
-          }
-        }
-
-        let newAuthorizationData = new AuthorizationData({authorizationToken, role, id}) // If role is patient then this "id" is pointing to patient schema "id" field, if role is secretary then this "id" is pointing to secretary schema "id" field, if role is doctor then this "id" is pointing to doctor schema "id" field
-        
-        await newAuthorizationData.save()
-
-        res.status(200).json({authorizationToken, role, id});
-      } else {
-        console.log("OTP is incorrect or expired");
-        res.status(500).json({ message: "OTP is incorrect or expired" });
-      }
+      res.status(200).json({...userInformation, role:role});
+    } else {
+      res.status(400).json({ message: "Incorrect OTP" });
     }
   } catch (error) {
     console.log(error);
@@ -114,3 +86,4 @@ async function verifyOtp(req, res) {
 }
 
 module.exports = verifyOtp;
+

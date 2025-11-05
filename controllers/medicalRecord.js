@@ -1,3 +1,6 @@
+// Lib
+const jwt = require('jsonwebtoken');
+
 // Models
 let MedicalRecord = require("../models/medicalRecord");
 let Patient = require("../models/patient");
@@ -6,31 +9,30 @@ let Secretary = require("../models/secretary");
 let Doctor = require("../models/doctor");
 
 async function getMedicalRecordsByClinicId(req, res) {
-  let authHeader = req.headers.authorization;
-  let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
-
-  let clinicId;
 
   try {
-    let authorizationData = await AuthorizationData.findOne({
-      authorizationToken,
-    });
-    let role = authorizationData.role;
-    let id = authorizationData.id;
+    const authorizationToken = req.cookies.authorizationToken;
+
+    const jwtSecretKey = process.env.JWT_SECRET_KEY;
+
+    const decoded = jwt.verify(authorizationToken, jwtSecretKey);
+
+    const role = decoded.role.toLowerCase()
+    const userId = decoded.userId
+
+    let clinicId = undefined
 
     if (role === "secretary") {
-      let secInformation = await Secretary.findOne({ id });
-
-      clinicId = secInformation.clinicId;
+      let a = await Secretary.findOne({ id: userId });
+      clinicId = a.clinicId
     }
 
     if (role === "doctor") {
-      let docInformation = await Doctor.findOne({ id });
-
-      clinicId = docInformation.clinicId;
+      let a = await Doctor.findOne({ id: userId });
+      clinicId = a.clinicId;
     }
 
-    let patientsRecords = await MedicalRecord.find({ clinicId })
+    let patientsRecords = await MedicalRecord.find({ clinicId: clinicId })
       .select("-photos")
       .sort({ createdAt: -1 })
       .limit(50);
@@ -129,33 +131,37 @@ async function getMedicalRecordsByPatientIdBySearchQuery(req, res) {
 }
 
 async function getMedicalRecordsBySearchQuery(req, res) {
-  let authHeader = req.headers.authorization;
-  let authorizationToken = authHeader && authHeader.split(" ")[1]; // Gets just the token part
-
-  let clinicId;
-
-  let query = req.query.q;
 
   try {
-    let authorizationData = await AuthorizationData.findOne({
-      authorizationToken,
-    });
-    let role = authorizationData.role;
-    let id = authorizationData.id;
+    const authorizationToken = req.cookies.authorizationToken;
+    
+    const jwtSecretKey = process.env.JWT_SECRET_KEY;
+
+    const decoded = jwt.verify(authorizationToken, jwtSecretKey);
+
+    const role = decoded.role.toLowerCase()
+    const userId = decoded.userId
+
+    let query = req.query.q;
+
+    let clinicId = undefined;
 
     if (role === "secretary") {
-      let secInformation = await Secretary.findOne({ id });
-
-      clinicId = secInformation.clinicId;
+      let a = await Secretary.findOne({ id:userId });
+      clinicId = a.clinicId;
     }
 
     if (role === "doctor") {
-      let docInformation = await Doctor.findOne({ id });
-
-      clinicId = docInformation.clinicId;
+      let a = await Doctor.findOne({ id:userId });
+      clinicId = a.clinicId;
     }
 
-    let patientsRecords = await MedicalRecord.find({
+    /*
+    
+    get all medical records that matches the query for the specific clinic id
+
+    */
+    let medicalRecords = await MedicalRecord.find({
       clinicId: clinicId,
       patientFirstAndLastName: { $regex: query, $options: "i" },
     })
@@ -163,7 +169,7 @@ async function getMedicalRecordsBySearchQuery(req, res) {
       .sort({ createdAt: -1 })
       .limit(50);
 
-    res.status(200).json(patientsRecords);
+    res.status(200).json(medicalRecords);
   } catch (error) {
     console.log(error);
     console.log("Error in getting patients medical record");

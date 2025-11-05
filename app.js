@@ -22,8 +22,14 @@ const account = require("./routes/account")
 // Create an Express application
 const app = express();
 
+// Trust proxy if behind CDN/ALB to get correct IPs for rate limit/HSTS
+app.set("trust proxy", 1);
+
 // Middleware to parse JSON request bodies
 app.use(express.json());
+
+// required lib so that we can do res.cookie and req.cookies later
+app.use(cookieParser());
 
 // To prevent our backend / server from abuse, added request limit
 app.use(limiter);
@@ -38,9 +44,6 @@ app.use(helmetSetting)
 
 // telling the browser that this sites (eg. www.a.com, www.h.com) are only allowed to read my response
 app.use(corsSetting)
-
-// required lib so that we can do res.cookie and req.cookies later
-app.use(cookieParser());
 
 // Run DB
 dbConfiguration()
